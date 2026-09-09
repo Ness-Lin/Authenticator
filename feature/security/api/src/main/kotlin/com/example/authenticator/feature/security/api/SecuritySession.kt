@@ -8,6 +8,7 @@ interface SecuritySession {
     val state: StateFlow<SecuritySessionState>
     suspend fun unlock(): AuthenticationResult
     suspend fun authorizeExport(requestId: String, accountIds: Set<com.example.authenticator.arch.api.AccountId>): AuthorizationResult
+    fun currentLease(): AccessLease?
     fun lock()
 }
 sealed interface AuthenticationResult { data class Unlocked(val lease: AccessLease) : AuthenticationResult; data object Rejected : AuthenticationResult; data object Unavailable : AuthenticationResult }

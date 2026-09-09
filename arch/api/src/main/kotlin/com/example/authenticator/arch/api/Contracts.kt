@@ -28,13 +28,27 @@ interface AccountRepository {
     suspend fun get(id: AccountId, lease: AccessLease): OperationResult<SensitiveAccount, RepositoryError>
     suspend fun save(account: SensitiveAccount, lease: AccessLease): OperationResult<AccountSummary, RepositoryError>
     suspend fun delete(id: AccountId, lease: AccessLease): OperationResult<Unit, RepositoryError>
+    /** 一次性读取指定账户集合，用于导出等需要一致快照的场景；任一账户缺失即整体失败。 */
+    suspend fun snapshot(ids: Set<AccountId>, lease: AccessLease): OperationResult<List<SensitiveAccount>, RepositoryError>
 }
-sealed interface RepositoryError { data object Conflict : RepositoryError; data object StorageFailure : RepositoryError; data object Unauthorized : RepositoryError }
+sealed interface RepositoryError {
+    data object Conflict : RepositoryError
+    data object NotFound : RepositoryError
+    data object StorageFailure : RepositoryError
+    data object Unauthorized : RepositoryError
+}
 
 interface CryptoProvider {
     suspend fun hmac(algorithm: OtpAlgorithm, secret: SensitiveBytes, message: ByteArray): ByteArray
     suspend fun deriveExportKey(password: SensitiveBytes, salt: ByteArray): SensitiveBytes
     suspend fun encryptExport(key: SensitiveBytes, nonce: ByteArray, aad: ByteArray, plaintext: ByteArray): ByteArray
+    suspend fun encryptRecord(keyVersion: Int, nonce: ByteArray, aad: ByteArray, plaintext: ByteArray): ByteArray
+    suspend fun decryptRecord(keyVersion: Int, nonce: ByteArray, aad: ByteArray, ciphertext: ByteArray): ByteArray
     suspend fun randomBytes(size: Int): ByteArray
 }
-interface AccessGate { fun isValid(lease: AccessLease, binding: OperationBinding): Boolean; fun revokeAll() }
+interface AccessGate {
+    fun issue(binding: OperationBinding): AccessLease
+    fun isValid(lease: AccessLease, binding: OperationBinding): Boolean
+    fun revoke(lease: AccessLease)
+    fun revokeAll()
+}

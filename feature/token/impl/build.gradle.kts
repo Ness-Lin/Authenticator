@@ -9,4 +9,5 @@ dependencies {
     implementation(project(":feature:security:api"))
     implementation(project(":arch:api"))
     implementation(project(":common:basic"))
+    testImplementation(libs.junit)
 }
