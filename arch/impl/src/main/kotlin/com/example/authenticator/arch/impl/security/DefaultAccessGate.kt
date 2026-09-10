@@ -42,7 +42,7 @@ internal class DefaultAccessGate : AccessGate {
     private fun authorize(granted: OperationBinding, requested: OperationBinding): Boolean {
         val operationAllowed = when (requested.operation) {
             OperationType.Export -> granted.operation == OperationType.Export
-            OperationType.Read -> granted.operation == OperationType.Read || granted.operation == OperationType.Export
+            OperationType.Read -> granted.operation == OperationType.Read || granted.operation == OperationType.Write || granted.operation == OperationType.Export
             OperationType.Write -> granted.operation == OperationType.Write
         }
         if (!operationAllowed) return false

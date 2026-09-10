@@ -1,3 +1,8 @@
 package com.example.authenticator.feature.security.impl
 
-// Business implementations will remain internal; factories will return API contracts.
+import com.example.authenticator.arch.api.AccessGate
+import com.example.authenticator.feature.security.api.SecuritySession
+
+object SecurityModule {
+    fun createSession(gate: AccessGate): SecuritySession = DefaultSecuritySession(gate)
+}

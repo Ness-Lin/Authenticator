@@ -13,7 +13,7 @@ data class UriEnrollmentRequest(val uri: String) {
 @JvmInline value class EnrollmentDraftId(val value: String) {
     override fun toString(): String = "EnrollmentDraftId([REDACTED])"
 }
-data class Preparation(val draftId: EnrollmentDraftId, val accountName: String, val issuer: String, val algorithm: String, val digits: Int, val periodSeconds: Int) {
+data class Preparation(val draftId: EnrollmentDraftId, val revision: Long, val accountName: String, val issuer: String, val algorithm: String, val digits: Int, val periodSeconds: Int) {
     init {
         require(digits == 6 || digits == 8) { "TOTP digits must be 6 or 8" }
         require(periodSeconds in 15..120) { "TOTP period must be between 15 and 120 seconds" }
