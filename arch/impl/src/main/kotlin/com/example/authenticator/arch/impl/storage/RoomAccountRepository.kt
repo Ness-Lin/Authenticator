@@ -60,7 +60,7 @@ internal class RoomAccountRepository(
             }
             val revision = dao.maxRevision() + 1
             val nonce = crypto.randomBytes(NONCE_BYTES)
-            val aad = recordAad(id.value, KEY_VERSION, revision)
+            val aad = recordAad(id.value, revision)
             val plaintext = RecordPayloadCodec.encode(account)
             val ciphertext = crypto.encryptRecord(KEY_VERSION, nonce, aad, plaintext)
             dao.upsert(
@@ -110,17 +110,18 @@ internal class RoomAccountRepository(
     }
 
     private suspend fun decryptEntity(entity: AccountEntity): SensitiveAccount {
-        val aad = recordAad(entity.recordId, entity.keyVersion, entity.revision)
-        val plaintext = crypto.decryptRecord(entity.keyVersion, entity.nonce, aad, entity.ciphertext)
+        require(entity.keyVersion == KEY_VERSION) { "Unsupported record key version: ${entity.keyVersion}" }
+        val aad = recordAad(entity.recordId, entity.revision)
+        val plaintext = crypto.decryptRecord(KEY_VERSION, entity.nonce, aad, entity.ciphertext)
         return RecordPayloadCodec.decode(AccountId(entity.recordId), plaintext)
     }
 
-    private fun recordAad(recordId: String, keyVersion: Int, revision: Long): ByteArray =
-        "authenticator-record:v1|$recordId|$keyVersion|$revision".toByteArray(Charsets.US_ASCII)
+    private fun recordAad(recordId: String, revision: Long): ByteArray =
+        "authenticator-record:v1|$recordId|$KEY_VERSION|$revision".toByteArray(Charsets.US_ASCII)
 
     private companion object {
         const val SCHEMA_VERSION = 1
-        const val KEY_VERSION = 1
+        const val KEY_VERSION = 2
         const val NONCE_BYTES = 12
     }
 }

@@ -8,11 +8,13 @@
 - 已实现 RFC 6238 TOTP、SHA-1/SHA-256/SHA-512、6/8 位和周期边界测试。
 - 已实现 Room + Android Keystore AES-GCM 加密记录存储、访问租约和加密/明文导出服务，并有格式单测。
 - 已补安全会话、手动 enrollment 校验、`otpauth://totp` 解析、Base32 规范化和首页账户列表/验证码刷新。
+- 已接入 CameraX + ML Kit 离线二维码扫描、相机权限处理和扫码账户确认保存流程。
+- 已加入系统默认、简体中文和 English 三种语言选项，选择结果持久化并在切换后即时重建界面。
 - 已关闭 Android 自动备份，并补充中英文首页/添加账户资源。
 
-## 本轮验证限制
+## 本轮验证
 
-当前开发终端未提供 `java` 或 `JAVA_HOME`，因此 Gradle 测试、Lint 和 APK 构建尚未执行。恢复 JDK 后必须优先运行 `./gradlew test check lint :app:assembleDebug`。
+已使用 Android Studio JBR 执行 `gradlew.bat test :app:assembleDebug`，测试与 Debug 构建均通过。
 
 ## 后续实施顺序
 
