@@ -23,5 +23,12 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Authenticator"
-include(":app")
- 
+include(
+    ":app",
+    ":common:basic",
+    ":arch:api", ":arch:impl", ":arch:ui",
+    ":feature:token:api", ":feature:token:impl", ":feature:token:ui",
+    ":feature:enrollment:api", ":feature:enrollment:impl", ":feature:enrollment:ui",
+    ":feature:transfer:api", ":feature:transfer:impl", ":feature:transfer:ui",
+    ":feature:security:api", ":feature:security:impl", ":feature:security:ui",
+)

@@ -6,7 +6,7 @@ plugins {
 android {
     namespace = "com.example.authenticator"
     compileSdk {
-        version = release(36) {
+        version = release(37) {
             minorApiLevel = 1
         }
     }
@@ -38,6 +38,22 @@ android {
 }
 
 dependencies {
+    implementation(project(":common:basic"))
+    implementation(project(":arch:api"))
+    implementation(project(":arch:impl"))
+    implementation(project(":arch:ui"))
+    implementation(project(":feature:token:api"))
+    implementation(project(":feature:token:impl"))
+    implementation(project(":feature:token:ui"))
+    implementation(project(":feature:enrollment:api"))
+    implementation(project(":feature:enrollment:impl"))
+    implementation(project(":feature:enrollment:ui"))
+    implementation(project(":feature:transfer:api"))
+    implementation(project(":feature:transfer:impl"))
+    implementation(project(":feature:transfer:ui"))
+    implementation(project(":feature:security:api"))
+    implementation(project(":feature:security:impl"))
+    implementation(project(":feature:security:ui"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
