@@ -66,12 +66,14 @@ internal class KeystoreCryptoProvider : CryptoProvider {
     }
 
     override suspend fun encryptRecord(keyVersion: Int, nonce: ByteArray, aad: ByteArray, plaintext: ByteArray): ByteArray {
-        val key = getOrCreateRecordKey(keyVersion)
+        require(keyVersion == RECORD_KEY_VERSION) { "Unsupported record key version: $keyVersion" }
+        val key = getOrCreateRecordKey()
         return aesGcm(Cipher.ENCRYPT_MODE, key, nonce, aad, plaintext)
     }
 
     override suspend fun decryptRecord(keyVersion: Int, nonce: ByteArray, aad: ByteArray, ciphertext: ByteArray): ByteArray {
-        val key = getRecordKey(keyVersion)
+        require(keyVersion == RECORD_KEY_VERSION) { "Unsupported record key version: $keyVersion" }
+        val key = getRecordKey()
         return aesGcm(Cipher.DECRYPT_MODE, key, nonce, aad, ciphertext)
     }
 
@@ -84,8 +86,8 @@ internal class KeystoreCryptoProvider : CryptoProvider {
         return cipher.doFinal(data)
     }
 
-    private fun getOrCreateRecordKey(keyVersion: Int): java.security.Key {
-        val alias = recordAlias(keyVersion)
+    private fun getOrCreateRecordKey(): java.security.Key {
+        val alias = RECORD_KEY_ALIAS
         val keyStore = KeyStore.getInstance(androidKeyStore).apply { load(null) }
         (keyStore.getKey(alias, null) as? javax.crypto.SecretKey)?.let { return it }
         val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, androidKeyStore)
@@ -96,21 +98,24 @@ internal class KeystoreCryptoProvider : CryptoProvider {
             )
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                // Record nonces are generated and persisted by the repository, so
+                // the key must accept a caller-provided IV during encryption.
+                .setRandomizedEncryptionRequired(false)
                 .setKeySize(256)
                 .build(),
         )
         return generator.generateKey()
     }
 
-    private fun getRecordKey(keyVersion: Int): java.security.Key {
+    private fun getRecordKey(): java.security.Key {
         val keyStore = KeyStore.getInstance(androidKeyStore).apply { load(null) }
-        return keyStore.getKey(recordAlias(keyVersion), null)
-            ?: error("Record key not present for version $keyVersion")
+        return keyStore.getKey(RECORD_KEY_ALIAS, null)
+            ?: error("Record key not present")
     }
 
-    private fun recordAlias(keyVersion: Int): String = "authenticator-record-key-v$keyVersion"
-
     private companion object {
+        const val RECORD_KEY_VERSION = 2
+        const val RECORD_KEY_ALIAS = "authenticator-record-key-v2"
         const val TRANSFORMATION = "AES/GCM/NoPadding"
         const val TAG_BITS = 128
     }
